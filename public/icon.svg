@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#0a0a0f"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="32" fill="url(#bg)"/>
+  <!-- Globe circle -->
+  <circle cx="128" cy="128" r="80" fill="none" stroke="#3b82f6" stroke-width="3" opacity="0.3"/>
+  <circle cx="128" cy="128" r="60" fill="none" stroke="#3b82f6" stroke-width="2" opacity="0.2"/>
+  <!-- Thermometer -->
+  <rect x="118" y="70" width="20" height="80" rx="10" fill="none" stroke="#e8e8f0" stroke-width="3"/>
+  <rect x="118" y="110" width="20" height="40" rx="10" fill="#ef4444" opacity="0.8"/>
+  <circle cx="128" cy="150" r="12" fill="#ef4444" opacity="0.9"/>
+  <!-- Degree symbol -->
+  <circle cx="145" cy="78" r="4" fill="#e8e8f0"/>
+  <text x="145" y="74" fill="#e8e8f0" font-family="monospace" font-size="12" font-weight="bold">C</text>
+  <!-- Up trend arrow -->
+  <polygon points="180,110 190,130 170,130" fill="#22c55e" opacity="0.8"/>
+</svg>

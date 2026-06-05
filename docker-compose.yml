@@ -1,0 +1,10 @@
+services:
+  dashboard:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      - VITE_WC_API_KEY=${VITE_WC_API_KEY:-placeholder}
+      - VITE_ECMWF_API_KEY=${VITE_ECMWF_API_KEY:-placeholder}
+      - VITE_REFRESH_INTERVAL_MS=${VITE_REFRESH_INTERVAL_MS:-60000}
+    restart: unless-stopped
