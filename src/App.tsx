@@ -24,7 +24,7 @@ function App() {
     result.sort((a: CityWeather, b: CityWeather) => {
       switch (sortBy) {
         case 'temp':
-          return b.wcTemperature - a.wcTemperature;
+          return b.currentTemperature - a.currentTemperature;
         case 'country':
           return a.country.localeCompare(b.country);
         case 'city':
@@ -69,7 +69,7 @@ function App() {
   return (
     <div className="min-h-screen bg-dash-bg flex flex-col">
       <Header 
-        wcOnline={data?.status.wcOnline ?? false} 
+        primaryOnline={data?.status.primaryOnline ?? false} 
         ecmwfOnline={data?.status.ecmwfOnline ?? false}
         lastUpdated={data?.status.lastUpdated ?? ''}
       />
@@ -104,7 +104,7 @@ function App() {
         {filteredAndSortedCities.length > 0 ? (
           <CityGrid 
             cities={filteredAndSortedCities} 
-            wcOnline={data?.status.wcOnline ?? true} 
+            primaryOnline={data?.status.primaryOnline ?? true} 
             ecmwfOnline={data?.status.ecmwfOnline ?? true} 
           />
         ) : (

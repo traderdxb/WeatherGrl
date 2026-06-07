@@ -15,7 +15,7 @@ export const Footer: React.FC<FooterProps> = ({ lastUpdated }) => {
         <div className="flex gap-6">
           <div className="flex flex-col items-center md:items-end">
             <span className="text-[9px] font-bold text-dash-muted uppercase tracking-tighter">Data Sources</span>
-            <span className="text-[10px] font-mono text-dash-text">WC API v4.2, ECMWF HRES</span>
+            <span className="text-[10px] font-mono text-dash-text">Open-Meteo (ECMWF IFS + Best Match)</span>
           </div>
           <div className="flex flex-col items-center md:items-end">
             <span className="text-[9px] font-bold text-dash-muted uppercase tracking-tighter">System Status</span>

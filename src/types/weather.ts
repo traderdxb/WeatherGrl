@@ -3,18 +3,21 @@ export interface CityWeather {
   country: string;
   latitude: number;
   longitude: number;
-  utcTime: string;        // HH:mm:ss
-  gmtTime: string;        // HH:mm:ss
-  wcTemperature: number;  // °C
-  ecmwfTemperature: number; // °C
-  variance: number;       // WC - ECMWF
+  utcTime: string;           // HH:mm:ss
+  gmtTime: string;           // HH:mm:ss
+  currentTemperature: number; // °C — primary current temp
+  ecmwfTemperature: number;   // °C — ECMWF model reference
+  highTemperature: number;    // °C — today's forecast high
+  lowTemperature: number;     // °C — today's forecast low
+  variance: number;           // current - ECMWF
   trend: "up" | "down" | "stable";
-  lastUpdated: string;    // ISO timestamp
+  resolutionSource: string;   // e.g. "KMA", "CMA", "NWS", "HKO"
+  lastUpdated: string;        // ISO timestamp
 }
 
 export interface CityWeatherError {
   city: string;
-  wcError?: string;
+  primaryError?: string;
   ecmwfError?: string;
   usingBackup: boolean;
   ecmwfUnavailable: boolean;
@@ -24,7 +27,7 @@ export interface WeatherData {
   cities: CityWeather[];
   errors: CityWeatherError[];
   status: {
-    wcOnline: boolean;
+    primaryOnline: boolean;
     ecmwfOnline: boolean;
     lastUpdated: string;
   };

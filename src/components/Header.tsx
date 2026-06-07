@@ -3,12 +3,12 @@ import { StatusBadge } from './StatusBadge';
 import { Globe } from 'lucide-react';
 
 interface HeaderProps {
-  wcOnline: boolean;
+  primaryOnline: boolean;
   ecmwfOnline: boolean;
   lastUpdated: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ wcOnline, ecmwfOnline, lastUpdated }) => {
+export const Header: React.FC<HeaderProps> = ({ primaryOnline, ecmwfOnline, lastUpdated }) => {
   return (
     <header className="border-b border-dash-border bg-dash-bg/80 backdrop-blur-md sticky top-0 z-50 py-4 px-6">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -28,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ wcOnline, ecmwfOnline, lastUpdat
         
         <div className="flex flex-col md:items-end gap-2">
           <div className="flex items-center gap-2">
-            <StatusBadge label="WC" online={wcOnline} />
+            <StatusBadge label="Primary" online={primaryOnline} />
             <StatusBadge label="ECMWF" online={ecmwfOnline} />
           </div>
           <div className="flex items-center gap-1.5 text-[10px] font-mono text-dash-muted">
