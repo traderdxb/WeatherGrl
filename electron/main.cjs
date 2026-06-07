@@ -10,7 +10,6 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     title: 'TempVeritas - Global Temperature Monitor',
-    icon: path.join(__dirname, '../public/favicon.png'),
     backgroundColor: '#0a0a0f',
     webPreferences: {
       nodeIntegration: false,
@@ -24,6 +23,24 @@ function createWindow() {
 
   // Load the built app
   mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+
+  // Open DevTools in development
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.webContents.openDevTools();
+  }
+
+  // Log any renderer errors to console
+  mainWindow.webContents.on('console-message', (event, level, message) => {
+    console.log(`[Renderer] ${message}`);
+  });
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    console.log('[Main] Page loaded successfully');
+  });
+
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.log(`[Main] Failed to load: ${errorDescription} (${errorCode})`);
+  });
 
   // Maximize on start for a more immersive experience
   mainWindow.maximize();
