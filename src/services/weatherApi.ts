@@ -16,22 +16,27 @@ interface CityConfig {
   latitude: number;
   longitude: number;
   timezone: string;
-  /** The centre-point temperature around which random variation is applied. */
-  baseTemp: number;
+  /** High temperature for the day (°C) */
+  highTemp: number;
+  /** Low temperature for the day (°C) */
+  lowTemp: number;
   /** Typical WC → ECMWF offset (can be negative). Small by design. */
   ecmwfOffset: number;
 }
 
 const CITY_CONFIGS: CityConfig[] = [
-  { city: 'Munich',         country: 'Germany',         latitude: 48.1351,  longitude: 11.5820,  timezone: 'Europe/Berlin',       baseTemp: 18.5, ecmwfOffset:  0.3 },
-  { city: 'London',         country: 'United Kingdom',  latitude: 51.5074,  longitude: -0.1278, timezone: 'Europe/London',       baseTemp: 15.2, ecmwfOffset: -0.9 },
-  { city: 'Paris',          country: 'France',          latitude: 48.8566,  longitude: 2.3522,  timezone: 'Europe/Paris',        baseTemp: 20.1, ecmwfOffset: -2.3 },
-  { city: 'New York City',  country: 'USA',             latitude: 40.7128,  longitude: -74.0060,timezone: 'America/New_York',    baseTemp: 22.8, ecmwfOffset:  1.3 },
-  { city: 'Washington DC',  country: 'USA',             latitude: 38.9072,  longitude: -77.0369,timezone: 'America/New_York',    baseTemp: 21.5, ecmwfOffset:  0.8 },
-  { city: 'Hong Kong',      country: 'China',           latitude: 22.3193,  longitude: 114.1694, timezone: 'Asia/Hong_Kong',     baseTemp: 29.4, ecmwfOffset: -0.7 },
-  { city: 'Taipei',         country: 'Taiwan',          latitude: 25.0330,  longitude: 121.5654, timezone: 'Asia/Taipei',        baseTemp: 28.1, ecmwfOffset:  0.3 },
-  { city: 'Shanghai',       country: 'China',           latitude: 31.2304,  longitude: 121.4737, timezone: 'Asia/Shanghai',      baseTemp: 26.3, ecmwfOffset: -0.4 },
-  { city: 'Shenzhen',       country: 'China',           latitude: 22.5431,  longitude: 114.0579, timezone: 'Asia/Shanghai',      baseTemp: 27.8, ecmwfOffset:  0.5 },
+  // European cities (June summer)
+  { city: 'Munich',         country: 'Germany',         latitude: 48.1351,  longitude: 11.5820,  timezone: 'Europe/Berlin',       highTemp: 26, lowTemp: 16, ecmwfOffset:  0.3 },
+  { city: 'London',         country: 'United Kingdom',  latitude: 51.5074,  longitude: -0.1278, timezone: 'Europe/London',       highTemp: 23, lowTemp: 15, ecmwfOffset: -0.9 },
+  { city: 'Paris',          country: 'France',          latitude: 48.8566,  longitude: 2.3522,  timezone: 'Europe/Paris',        highTemp: 27, lowTemp: 17, ecmwfOffset: -2.3 },
+  // US East Coast (June summer)
+  { city: 'New York City',  country: 'USA',             latitude: 40.7128,  longitude: -74.0060,timezone: 'America/New_York',    highTemp: 29, lowTemp: 20, ecmwfOffset:  1.3 },
+  { city: 'Washington DC',  country: 'USA',             latitude: 38.9072,  longitude: -77.0369,timezone: 'America/New_York',    highTemp: 31, lowTemp: 21, ecmwfOffset:  0.8 },
+  // Asian cities (monsoon/summer)
+  { city: 'Hong Kong',      country: 'China',           latitude: 22.3193,  longitude: 114.1694, timezone: 'Asia/Hong_Kong',     highTemp: 32, lowTemp: 27, ecmwfOffset: -0.7 },
+  { city: 'Taipei',         country: 'Taiwan',          latitude: 25.0330,  longitude: 121.5654, timezone: 'Asia/Taipei',        highTemp: 33, lowTemp: 26, ecmwfOffset:  0.3 },
+  { city: 'Shanghai',       country: 'China',           latitude: 31.2304,  longitude: 121.4737, timezone: 'Asia/Shanghai',      highTemp: 30, lowTemp: 23, ecmwfOffset: -0.4 },
+  { city: 'Shenzhen',       country: 'China',           latitude: 22.5431,  longitude: 114.0579, timezone: 'Asia/Shanghai',      highTemp: 32, lowTemp: 27, ecmwfOffset:  0.5 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -43,6 +48,23 @@ import type { CityWeather, CityWeatherError, WeatherData } from '../types/weathe
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Calculate the diurnal temperature at a given hour in a 24-hour cycle.
+ * Peaks at 14:00 (2 PM), lowest at 02:00 (2 AM), using a cosine curve.
+ */
+const diurnalTemp = (hour: number, high: number, low: number): number => {
+  const mean = (high + low) / 2;
+  const amp = (high - low) / 2;
+  // Peak at hour 14 (2 PM), trough at hour 2 (2 AM)
+  return mean + amp * Math.cos(((hour - 14) * 2 * Math.PI) / 24);
+};
+
+/** Parse the hour from a formatted time string like "14:32:05" */
+const getHourFromTime = (timeStr: string): number => {
+  const parts = timeStr.split(':');
+  return parseInt(parts[0], 10);
+};
 
 /** Return a random offset in the range [-range, +range). */
 const randomOffset = (range: number): number => (Math.random() * 2 - 1) * range;
@@ -93,15 +115,20 @@ export const fetchWeatherData = (): WeatherData => {
   const errors: CityWeatherError[] = [];
 
   for (const cfg of CITY_CONFIGS) {
-    // Per-city failures (occasional individual drops)
+    // Get local hour for diurnal temperature calculation
+    const localTime = formatTime(now, cfg.timezone);
+    const localHour = getHourFromTime(localTime);
+
+    // WC temperature based on diurnal cycle + small random variation
+    const baseTemp = diurnalTemp(localHour, cfg.highTemp, cfg.lowTemp);
+    const wcTemp = parseFloat((baseTemp + randomOffset(0.8)).toFixed(1));
+
+    // ECMWF temperature with model offset + variation
+    const ecmwfTemp = parseFloat((baseTemp + cfg.ecmwfOffset + randomOffset(1.0)).toFixed(1));
+
+    // Per-city failures (near-zero probability)
     const wcFails = !wcOnline || shouldFail(WC_FAIL_PROB);
     const ecmwfFails = !ecmwfOnline || shouldFail(ECMWF_FAIL_PROB);
-
-    // WC temperature (primary)
-    const wcTemp = parseFloat((cfg.baseTemp + randomOffset(1.0)).toFixed(1));
-
-    // ECMWF temperature (slightly offset from base)
-    const ecmwfTemp = parseFloat((cfg.baseTemp + cfg.ecmwfOffset + randomOffset(1.0)).toFixed(1));
 
     // Fallback: if WC is down, use ECMWF as display temperature
     const effectiveWcTemp = wcFails ? ecmwfTemp : wcTemp;
