@@ -18,6 +18,7 @@ interface CityCardProps {
 
 export const CityCard: React.FC<CityCardProps> = ({ weather, wcError, ecmwfError }) => {
   const displayTemp = wcError ? weather.ecmwfTemperature : weather.wcTemperature;
+  const tempDisplay = Number.isFinite(displayTemp) ? displayTemp.toFixed(1) : '--';
   
   return (
     <div className="bg-dash-card border border-dash-border hover:border-dash-accent/50 hover:bg-dash-card-hover transition-all duration-300 rounded-xl overflow-hidden group">
@@ -48,7 +49,7 @@ export const CityCard: React.FC<CityCardProps> = ({ weather, wcError, ecmwfError
       <div className="p-5 flex items-center justify-between">
         <div className="flex items-baseline gap-2">
           <span className="text-4xl font-black mono tracking-tighter text-dash-text">
-            {displayTemp.toFixed(1)}°
+            {tempDisplay}°
           </span>
           <span className="text-lg font-bold text-dash-muted">C</span>
         </div>
@@ -68,7 +69,7 @@ export const CityCard: React.FC<CityCardProps> = ({ weather, wcError, ecmwfError
               "mono text-sm font-bold",
               wcError ? "text-dash-error line-through opacity-50" : "text-dash-text"
             )}>
-              {weather.wcTemperature.toFixed(1)}°C
+              {Number.isFinite(weather.wcTemperature) ? weather.wcTemperature.toFixed(1) : '--'}°C
             </span>
             {wcError && <AlertTriangle className="w-3 h-3 text-dash-error" />}
           </div>
@@ -82,7 +83,7 @@ export const CityCard: React.FC<CityCardProps> = ({ weather, wcError, ecmwfError
               "mono text-sm font-bold",
               ecmwfError ? "text-dash-error line-through opacity-50" : "text-dash-text"
             )}>
-              {weather.ecmwfTemperature.toFixed(1)}°C
+              {Number.isFinite(weather.ecmwfTemperature) ? weather.ecmwfTemperature.toFixed(1) : '--'}°C
             </span>
           </div>
         </div>

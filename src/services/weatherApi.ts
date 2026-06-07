@@ -54,9 +54,9 @@ const formatTime = (date: Date, tz?: string): string =>
 /** Determine whether a source should be simulated as "offline" for this cycle. */
 const shouldFail = (probability: number): boolean => Math.random() < probability;
 
-/** Per-city failure probabilities (very small so tests work without being annoying). */
-const WC_FAIL_PROB = 0.08;     // 8 % — WC data delayed
-const ECMWF_FAIL_PROB = 0.12;  // 12 % — ECMWF unavailable
+/** Per-city failure probabilities (near-zero for clean production use). */
+const WC_FAIL_PROB = 0.001;     // 0.1 % — almost never
+const ECMWF_FAIL_PROB = 0.001;  // 0.1 % — almost never
 
 // ---------------------------------------------------------------------------
 // Previous-temperature tracking (for trend detection)
@@ -85,9 +85,9 @@ export const fetchWeatherData = (): WeatherData => {
   const utcTime = formatTime(now, 'UTC');
   const isoNow = now.toISOString();
 
-  // Per-source overall status
-  const wcOnline = !shouldFail(0.10);       // 10% chance WC is fully offline
-  const ecmwfOnline = !shouldFail(0.15);     // 15% chance ECMWF is fully offline
+  // Per-source overall status (near-zero for clean production use)
+  const wcOnline = !shouldFail(0.001);       // 0.1 % — almost never
+  const ecmwfOnline = !shouldFail(0.001);     // 0.1 % — almost never
 
   const cities: CityWeather[] = [];
   const errors: CityWeatherError[] = [];
